@@ -3,7 +3,7 @@ set -e
 
 usage() {
     >&2 cat << EOF
-Usage: spinstamp [options] FILE 
+Usage: spinstamp [options] OBJECT 
 
 Add header and license information to a Spin object.
 
@@ -13,7 +13,7 @@ Options:
   -h, --help     Displays this help.
 
 Arguments:
-  FILE           Spin file to stamp.
+  OBJECT         Spin object to stamp.
 EOF
     exit 0
 }

@@ -1,0 +1,62 @@
+#!/bin/bash
+set -e
+
+usage() {
+    >&2 cat << EOF
+Usage: spinencode OBJECT
+
+Encode legacy Propeller Tool Spin objects as UTF-8.
+
+Options:
+  -h, --help     Displays this help.
+
+Arguments:
+  OBJECT         Spin object to encode.
+EOF
+    exit 0
+}
+
+while [[ $# > 0 ]]
+do
+    ARG="$1"
+    shift
+
+    case $ARG in
+        -h|--help)
+            usage
+            ;;
+
+        *)
+            FILE="$ARG"
+            ;;
+    esac
+done
+
+if [ -z $FILE ] ; then
+    >&2 echo "Error: No Spin object given!"
+    exit 1
+fi
+
+if [ ${FILE: -5} != ".spin" ] ; then
+    >&2 echo "Error: File given not a Spin object!"
+    exit 1
+fi
+
+ENCODING=$(file "$FILE" | cut -d':' -f 2)
+
+# Fix encoding
+if [[ $ENCODING == *"ISO-8859"* ]] ; then
+    iconv -f iso-8859-1 -t utf-8 "$FILE" > "$FILE.tmp"
+    mv "$FILE.tmp" "$FILE"
+
+elif [[ $ENCODING == *"UTF-16"* ]] ; then
+    iconv -f utf-16 -t utf-8 "$FILE" > "$FILE.tmp"
+    mv "$FILE.tmp" "$FILE"
+fi
+
+# Fix FILE endings
+if [[ $ENCODING == *"CR FILE terminators"* ]] ; then
+    mac2unix "$FILE"
+elif [[ $ENCODING == *"CRLF FILE terminators"* ]] ; then
+    dos2unix "$FILE"
+fi
